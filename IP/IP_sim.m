@@ -71,29 +71,23 @@ xd = [0.3    0.0];
 output_names = ["$x$", "$\alpha$", "$\frac{dx}{dt}$", "$\frac{d\alpha}{dt}$"];
 out = sim("closed_loop2.slx");
 
-% fig1 = figure(1);
-% fig2 = figure(2);
-% 
-% for j =1:size(out.state, 1)
-%     set(0,'CurrentFigure',fig1);
-%     subplot(2,2,j);
-%     plot(out.tout, out.state(j, :), 'LineWidth', 1);
-%     title(sprintf("Closed-loop response: %s", output_names(j)), 'Interpreter','latex');
-%     grid on
-%     hold on 
-% end
-% set(0,'CurrentFigure',fig2);
-% plot(out.tout, out.vin, 'LineWidth', 1);
-% title("Input voltage (V)");
-% hold on
-% 
-% set(0,'CurrentFigure',fig2);
-% yline(5, 'DisplayName', 'Voltage limit', 'LineWidth', 1, 'LineStyle', '--');
-% legend
+fig1 = figure(1);
+fig2 = figure(2);
 
+for j =1:size(out.state, 2)
+    set(0,'CurrentFigure',fig1);
+    subplot(2,1,j);
+    plot(out.tout, out.state(:, j), 'LineWidth', 1);
+    title(sprintf("Closed-loop response: %s", output_names(j)), 'Interpreter','latex');
+    grid on
+    hold on 
+end
 
-
-
+set(0,'CurrentFigure',fig2);
+plot(out.tout, out.vin, 'LineWidth', 1);
+title("Input voltage (V)");
+hold on
+legend
 
 
 
