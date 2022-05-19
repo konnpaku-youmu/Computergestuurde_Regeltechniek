@@ -55,9 +55,13 @@ OpenLoop = ss(A, B, C, D);
 % title("Pole-zero map: open-loop");
 % grid on
 
-% full measurement
+% full output vector
 C = eye(4);
 D = zeros(4, 1);
+
+Q11 = [0.1, 0.25, 1, 5, 10];
+Q22 = [0.25];
+Rs = [0.001, 0.003, 0.01, 0.1, 0.5];
 
 % LQR
 Q = [ 1   0    0   0;
@@ -97,29 +101,69 @@ xd = [0.3          0.0      0   0]';
 T_final = 5;
 
 fig1 = figure(1);
-fig2 = figure(2);
+fig1.Position = [200, 200, 1440, 720];
 
-[K, S, e] = lqr(OpenLoop, Q, R);
+fig2 = figure(2);
+fig2.Position = [1640, 200, 800, 720];
 
 output_names = ["$x$", "$\alpha$", "$\frac{dx}{dt}$", "$\frac{d\alpha}{dt}$"];
-out = sim("closed_loop.slx");
+ylabels = ["Offset (m)", "Offset (rad)", "Cart velocity (m/s)", "Rod angular velocity (rad/s)"];
+
+
+for i=1:length(Q22)
+    Q(2, 2) = Q22(i);
+    label = sprintf("$Q_{2,2} = %2.2f$", Q22(i));
+    
+    [K, S, e] = lqr(OpenLoop, Q, R);
+    out = sim("closed_loop.slx");
+    
+    for j =1:size(out.state, 1)
+        set(0,'CurrentFigure',fig1);
+        subplot(2,2,j);
+
+        plot(out.tout, out.state(j, :), 'LineWidth', 1, 'DisplayName', label);
+        xlabel("Time(s)", 'Interpreter','latex');
+        ylabel(ylabels(j), 'Interpreter','latex');
+        title(sprintf("Closed-loop response: %s", output_names(j)), 'Interpreter','latex');
+
+        hl = legend('show');
+        set(hl, 'Interpreter', 'latex');
+        hold on;
+        grid on;
+        axis fill;
+    end
+    
+    set(0,'CurrentFigure',fig2);
+    plot(out.tout, out.vin, 'LineWidth', 1, 'DisplayName', label);
+    title("Input voltage (V)", 'Interpreter','latex');
+    hold on
+end
+
+set(0,'CurrentFigure',fig2);
+
+yline(5, 'DisplayName', 'Voltage limit', 'LineWidth', 1, 'LineStyle', '--');
+xlabel("Time(s)", 'Interpreter','latex');
+ylabel("Voltage (V)", 'Interpreter','latex');
+grid on
+hl = legend('show');
+set(hl, 'Interpreter', 'latex');
+
 
 for j =1:size(out.state, 1)
     set(0,'CurrentFigure',fig1);
-    subplot(2,2,j);
-    plot(out.tout, out.state(j, :), 'LineWidth', 1);
-    title(sprintf("Closed-loop response: %s", output_names(j)), 'Interpreter','latex');
-    grid on
-    hold on 
+    subplot(2, 2, j);
+    ax = gca;
+    outerpos = ax.OuterPosition;
+    ti = ax.TightInset; 
+    left = outerpos(1) - 0.1*ti(1);
+    bottom = outerpos(2) + ti(2);
+    ax_width = outerpos(3);
+    ax_height = outerpos(4) - ti(2) - ti(4);
+    ax.Position = [left bottom ax_width ax_height];
 end
-set(0,'CurrentFigure',fig2);
-plot(out.tout, out.vin, 'LineWidth', 1);
-title("Input voltage (V)");
-hold on
 
-set(0,'CurrentFigure',fig2);
-yline(5, 'DisplayName', 'Voltage limit', 'LineWidth', 1, 'LineStyle', '--');
-legend
+% saveas(fig1, "/home/yz/Projects/Reports/CACSD_IP/figures/closed_Q2.png", 'png');
+% saveas(fig2, "/home/yz/Projects/Reports/CACSD_IP/figures/closed_Q2_vin.png", 'png');
 
 
 
