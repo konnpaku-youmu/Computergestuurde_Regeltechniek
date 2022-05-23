@@ -1,6 +1,6 @@
 clc;
 clear;
-
+load("setpoint.mat");
 rnd = randi(500, 1);
 
 %% constants
@@ -14,7 +14,7 @@ m = 0.210;
 r = 0.635e-2;
 g = 9.81;
 
-f_c = [10];
+f_c = [20];
 w_c = 2*pi*f_c;
 fs = 200;
 T_s = 1/fs;
@@ -38,20 +38,21 @@ D = [0;0];
 OpenLoop = ss(A, B, C, D);
 
 %% LQR
-Q = [ 4.5   0    0   0;
-      0     6    0   0;
+Q = [ 1.5   0    0   0;
+      0     10    0   0;
       0     0    0   0;
       0     0    0   0];
 
 R = 0.005;
 
 %% response
-pos_init = 0;
-angle_init = 15*pi/180;
+pos_init = -0.015;
+angle_init = -8.5*pi/180;
 x0 = [pos_init  angle_init      0.0     0.0];
-xd = [0.2    0.0];
 
-[K, S, e] = lqr(OpenLoop, Q, R);
+xd = sp(1:12800, 1);
+
+[K, S, e] = lqrd(A, B, Q, R, T_s);
 
 output_names = ["$x$", "$\alpha$", "$\frac{dx}{dt}$", "$\frac{d\alpha}{dt}$"];
 ylabels = ["Cart position (m)", "Rod angle (rad)"];
