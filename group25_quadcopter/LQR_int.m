@@ -66,8 +66,14 @@ D_i = D_z;
 
 rank(ctrb(A_i, B_i))
 
-Q = diag([0.2, 0.2, 0.75, 32, 32, 75, 0, 0, 0, 5, 5, 5, 0, 0, 0]);
-R = diag([0.05, 0.05, 0.05, 0.05]);
+% Q = diag([0.2, 0.2, 0.75, 32, 32, 75, 0, 0, 0, 5, 5, 5, 0, 0, 0]);
+% R = diag([0.05, 0.05, 0.05, 0.05]);
+
+Q = diag([0.75, 0.75, 1.5, 85, 85, 125, 75, 75, 90, 5, 5, 5, 50, 50, 100]);
+R = diag([0.01, 0.01, 0.01, 0.01]);
+
+fig = figure(1);
+fig.Position = [200, 200, 1600, 420];
 
 [K, S, e] = dlqr(A_i, B_i, Q, R);
 
@@ -76,4 +82,23 @@ K_s = K(:, 4:end);
 
 sim("LQR_int_quadcopter.slx");
 
+output_names = ["$x$", "$y$", "$z$", "$\phi$", "$\theta$", "$\psi$"];
+ylabels = ["$x (m)$", "$y (m)$", "$z (m)$", "$Roll (rad)$", "$Pitch (rad)$", "$Yaw (rad)$"];
+
+for i=1:3
+    subplot(1,3,i)
+    if(i<=3)
+        plot(states_quadcopter.time, simout(:, i), 'DisplayName', "Reference", 'LineWidth', 1);
+        hold on
+    end
+    plot(states_quadcopter.time, simout(:, i+3), 'DisplayName', "Payload = 0.1kg", 'LineWidth', 1);
+    xlabel("Time(s)", 'Interpreter','latex');
+    ylabel(ylabels(i), 'Interpreter','latex');
+    title(sprintf("Output: %s", output_names(i)), 'Interpreter', 'latex');
+
+    hl = legend('show');
+    set(hl, 'Interpreter', 'latex');
+
+    grid on
+end
 
