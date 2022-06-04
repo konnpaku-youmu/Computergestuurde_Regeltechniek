@@ -100,7 +100,7 @@ R = diag([0.005, 0.005, 0.005, 0.005]);
 
 [K, S, e] = dlqr(A_z, B_z, Q, R);
 
-sim("LQR_quadcopter.slx", Tmax);
+sim("LQR_sim.slx", Tmax);
 % generate_report(0);
 
 output_names = ["$x$", "$y$", "$z$", "$\phi$", "$\theta$", "$\psi$"];
@@ -113,23 +113,6 @@ for i=1:6
         hold on
     end
     plot(states_quadcopter.time, simout(:, i+3), 'DisplayName', "No payload", 'LineWidth', 1);
-    xlabel("Time(s)", 'Interpreter','latex');
-    ylabel(ylabels(i), 'Interpreter','latex');
-    title(sprintf("Output: %s", output_names(i)), 'Interpreter', 'latex');
-
-    hl = legend('show');
-    set(hl, 'Interpreter', 'latex');
-
-    grid on
-end
-
-payload_quadcopter = 0.1;
-sim("LQR_quadcopter.slx", Tmax);
-
-for i=1:6
-    subplot(2,3,i)
-
-    plot(states_quadcopter.time, simout(:, i+3), 'DisplayName', "Payload = 0.1kg", 'LineWidth', 1, 'Color', '#00EEAA');
     xlabel("Time(s)", 'Interpreter','latex');
     ylabel(ylabels(i), 'Interpreter','latex');
     title(sprintf("Output: %s", output_names(i)), 'Interpreter', 'latex');

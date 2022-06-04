@@ -14,7 +14,7 @@ m = 0.210;
 r = 0.635e-2;
 g = 9.81;
 
-f_c = [20];
+f_c = [10];
 w_c = 2*pi*f_c;
 fs = 200;
 T_s = 1/fs;
@@ -43,7 +43,7 @@ Q = [ 1.5   0    0   0;
       0     0    0   0;
       0     0    0   0];
 
-R = 0.005;
+R = 0.006;
 
 %% response
 pos_init = -0.015;
@@ -52,7 +52,13 @@ x0 = [pos_init  angle_init      0.0     0.0];
 
 xd = sp(1:12800, 1);
 
-[K, S, e] = lqrd(A, B, Q, R, T_s);
+ip_d = c2d(OpenLoop, T_s, 'tustin');
+A_z = ip_d.A;
+B_z = ip_d.B;
+C_z = ip_d.C;
+D_z = ip_d.D;
+
+[K, S, e] = dlqr(A_z, B_z, Q, R);
 
 output_names = ["$x$", "$\alpha$", "$\frac{dx}{dt}$", "$\frac{d\alpha}{dt}$"];
 ylabels = ["Cart position (m)", "Rod angle (rad)"];
@@ -79,15 +85,16 @@ for i=1:length(w_c)
     
     out = sim("closed_loop2.slx");
 
-%     label = sprintf("$f_c = %2.1f Hz$", f_c(i));
-    label = sprintf("Closed-loop II : $f_c = %2.1f Hz$", f_c(i));
+    label = sprintf("Deadzone = 0.6V");
     
     for j =1:size(out.state, 2)
         set(0,'CurrentFigure',fig1);
         subplot(1,2,j);
-        plot(out.tout, out.state(:, j), 'LineWidth', 1, 'DisplayName', label);
-        hold on
+        
         plot(out.tout, out.sp(:, j), 'LineWidth', 1.5, 'DisplayName', "Setpoint");
+        hold on
+        plot(out.tout, out.state(:, j), 'LineWidth', 1, 'DisplayName', label);
+        
         xlabel("Time(s)", 'Interpreter','latex');
         ylabel(ylabels(j), 'Interpreter','latex');
         title(sprintf("Closed-loop response: %s", output_names(j)), 'Interpreter','latex');

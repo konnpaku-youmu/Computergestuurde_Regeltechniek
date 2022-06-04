@@ -77,18 +77,23 @@ R_k = diag([2.5e-5, 2.5e-5, 2.5e-5, 7.57e-5, 7.57e-5, 7.57e-5]);
 [M, P, Cov, Poles_esti] = dlqe(A_z, eye(12), C_z, Q_k, R_k);
 L_k = A_z*M;
 
-sim("LQG_quadcopter.slx");
+sim("LQG_sim.slx");
+
+fig = figure(1);
+fig.Position = [200, 200, 1200, 800];
+
 output_names = ["$x$", "$y$", "$z$", "$\phi$", "$\theta$", "$\psi$"];
 ylabels = ["$x (m)$", "$y (m)$", "$z (m)$", "$Roll (rad)$", "$Pitch (rad)$", "$Yaw (rad)$"];
 
-for i=1:6
-    subplot(2,3,i)
+for i=1:3
+    subplot(3,1,i);
+
     if(i<=3)
         plot(tout, simout(:, i), 'DisplayName', "Reference", 'LineWidth', 1);
         hold on
     end
 
-    plot(tout, simout(:, i+3), 'DisplayName', "Payload = 0.1kg", 'LineWidth', 1);
+    plot(tout, simout(:, i+3), 'DisplayName', "LQG: Payload = 0.1kg", 'LineWidth', 1);
     xlabel("Time(s)", 'Interpreter','latex');
     ylabel(ylabels(i), 'Interpreter','latex');
     title(sprintf("Output: %s", output_names(i)), 'Interpreter', 'latex');
